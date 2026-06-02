@@ -1,0 +1,5 @@
+.claude/
+.render/
+node_modules/
+*.pdf
+*.pdfZone.Identifier

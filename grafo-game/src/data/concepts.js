@@ -1,0 +1,233 @@
+// Reference cards for the Conceitos drawer. Each fiche auto-highlights when the
+// matching algorithm is running (via `algoKey`).
+
+export const CONCEPTS = [
+  {
+    key: 'bfs',
+    algoKey: 'bfs',
+    title: 'Busca em Largura (BFS)',
+    tags: ['grafos', 'caminho mínimo'],
+    complexity: 'O(V + E) com lista de adjacência · O(V²) com matriz',
+    when: 'Caminho mínimo em número de arestas (grafo sem pesos); árvore de busca em largura; níveis/camadas.',
+    pseudo: [
+      'd[s]=0; enfileira s',
+      'enquanto fila ≠ ∅:',
+      '  u = desenfileira',
+      '  para v adj a u, se branco:',
+      '    d[v]=d[u]+1; π[v]=u; enfileira v',
+    ],
+    pitfalls: [
+      'Usa FILA (FIFO), não pilha — trocar por pilha vira DFS.',
+      'A distância é o nº de arestas; não serve para grafos com pesos.',
+      'Marcar como visitado ao ENFILEIRAR (não ao desenfileirar) evita duplicatas.',
+    ],
+  },
+  {
+    key: 'dfs',
+    algoKey: 'dfs',
+    title: 'Busca em Profundidade (DFS)',
+    tags: ['grafos', 'classificação de arestas'],
+    complexity: 'O(V + E) com lista de adjacência',
+    when: 'Classificação de arestas, detecção de ciclos, ordenação topológica, componentes.',
+    pseudo: [
+      'DFS-Visita(u):',
+      '  d[u]=++tempo; cor[u]=cinza',
+      '  para v adj a u:',
+      '    branco → ÁRVORE; cinza → RETORNO',
+      '    preto → AVANÇO (d[u]<d[v]) ou CRUZAMENTO',
+      '  f[u]=++tempo; cor[u]=preto',
+    ],
+    pitfalls: [
+      'Aresta de RETORNO ⟹ existe ciclo (em grafo direcionado).',
+      'Em grafo não-direcionado só há arestas de árvore e de retorno.',
+      'Avanço vs. cruzamento: compare os tempos de descoberta d[u] e d[v].',
+    ],
+  },
+  {
+    key: 'dijkstra',
+    algoKey: 'dijkstra',
+    title: 'Dijkstra',
+    tags: ['caminho mínimo', 'guloso'],
+    complexity: 'O((V + E) log V) com heap · O(V²) com matriz/busca linear',
+    when: 'Caminho mínimo de uma origem com pesos NÃO negativos.',
+    pseudo: [
+      'dist[s]=0; demais=∞',
+      'enquanto Q≠∅:',
+      '  u = extrai-mínimo(Q)',
+      '  para v adj a u:',
+      '    se dist[u]+w(u,v) < dist[v]: relaxa',
+    ],
+    pitfalls: [
+      'NÃO funciona com pesos negativos — use Bellman-Ford.',
+      'Busca linear do mínimo dá O(V²); heap dá O((V+E)log V).',
+      'Relaxar antes de inicializar distâncias produz ∞ + w = ∞ (erro clássico).',
+    ],
+  },
+  {
+    key: 'floydWarshall',
+    algoKey: 'floydWarshall',
+    title: 'Floyd-Warshall',
+    tags: ['caminho mínimo', 'todos os pares'],
+    complexity: 'Θ(V³)',
+    when: 'Distâncias mínimas entre TODOS os pares; aceita pesos negativos (sem ciclo negativo).',
+    pseudo: [
+      'D = matriz de pesos (0 na diagonal, ∞ sem aresta)',
+      'para k, para i, para j:',
+      '  D[i][j] = min(D[i][j], D[i][k]+D[k][j])',
+    ],
+    pitfalls: [
+      'k é o LAÇO EXTERNO (vértice intermediário) — inverter a ordem quebra o algoritmo.',
+      'D[i][i] < 0 detecta ciclo negativo.',
+      'Θ(V³) independe do nº de arestas.',
+    ],
+  },
+  {
+    key: 'dagShortest',
+    algoKey: 'topologicalSort',
+    title: 'Caminho mínimo em DAG',
+    tags: ['caminho mínimo', 'dag'],
+    complexity: 'O(V + E) (linear)',
+    when: 'Grafo direcionado ACÍCLICO; aceita pesos negativos.',
+    pseudo: [
+      'ordena topologicamente os vértices',
+      'na ordem topológica, relaxa todas as arestas de cada u',
+    ],
+    pitfalls: [
+      'Só funciona em DAG (sem ciclos).',
+      'Aceita pesos negativos — diferente de Dijkstra.',
+      'É linear porque cada aresta é relaxada uma única vez.',
+    ],
+  },
+  {
+    key: 'topologicalSort',
+    algoKey: 'topologicalSort',
+    title: 'Ordenação Topológica (fonte)',
+    tags: ['grafos', 'dag'],
+    complexity: 'O(V + E)',
+    when: 'Ordenar tarefas de um DAG respeitando dependências.',
+    pseudo: [
+      'calcula grau de entrada de todos',
+      'enquanto há fonte (grau de entrada 0):',
+      '  remove a fonte u, coloca em F',
+      '  decrementa o grau de entrada dos vizinhos',
+    ],
+    pitfalls: [
+      'Se sobrar vértice sem fonte ⟹ há ciclo (não é DAG).',
+      'a) achar fonte; b) inserir em F (O(1) no fim da lista); c) remover arestas.',
+      'A ordem não é única quando há várias fontes.',
+    ],
+  },
+  {
+    key: 'kosaraju',
+    algoKey: 'kosaraju',
+    title: 'Kosaraju (CFC)',
+    tags: ['grafos', 'componentes'],
+    complexity: 'O(V + E)',
+    when: 'Encontrar componentes fortemente conexas de um grafo direcionado.',
+    pseudo: [
+      '1ª DFS em G: guarda ordem de fechamento (pilha)',
+      'computa o transposto Gᵀ',
+      '2ª DFS em Gᵀ na ordem decrescente de fechamento',
+      'cada árvore da 2ª DFS = uma CFC',
+    ],
+    pitfalls: [
+      'São DUAS buscas em profundidade — não uma só.',
+      'A 2ª DFS é no grafo TRANSPOSTO (arestas invertidas).',
+      'Processar na ordem decrescente do tempo de fechamento da 1ª DFS é essencial.',
+    ],
+  },
+  {
+    key: 'kruskal',
+    algoKey: 'kruskal',
+    title: 'Kruskal (AGM)',
+    tags: ['guloso', 'agm'],
+    complexity: 'O(E log E)',
+    when: 'Árvore Geradora Mínima conectando tudo com custo mínimo.',
+    pseudo: [
+      'ordena arestas por peso crescente',
+      'para cada aresta (u,v):',
+      '  se find(u) ≠ find(v): aceita e union(u,v)',
+      '  senão: descarta (ciclo)',
+    ],
+    pitfalls: [
+      'Ordenar por peso CRESCENTE. Decrescente + remover = algoritmo reverso (ainda dá AGM).',
+      'Union-Find evita ciclos em quase O(1) amortizado.',
+      'Para na (V−1)-ésima aresta aceita.',
+    ],
+  },
+  {
+    key: 'prim',
+    algoKey: 'prim',
+    title: 'Prim (AGM)',
+    tags: ['guloso', 'agm'],
+    complexity: 'O((V + E) log V) com heap · O(V²) com matriz',
+    when: 'Árvore Geradora Mínima crescendo a partir de uma raiz.',
+    pseudo: [
+      'key[r]=0; demais=∞',
+      'enquanto Q≠∅:',
+      '  u = extrai-mínimo (aresta leve do corte)',
+      '  para v adj a u em Q: se w(u,v)<key[v], atualiza',
+    ],
+    pitfalls: [
+      'A cada passo escolhe a aresta LEVE que cruza o corte (dentro × fora).',
+      'Difere de Dijkstra: usa o peso da aresta w(u,v), não dist[u]+w.',
+      'Sempre gera uma árvore conexa (não há ciclos).',
+    ],
+  },
+  {
+    key: 'huffman',
+    algoKey: 'huffman',
+    title: 'Huffman',
+    tags: ['guloso', 'codificação'],
+    complexity: 'O(n log n)',
+    when: 'Código de prefixo ótimo (compressão) a partir de frequências.',
+    pseudo: [
+      'fila de prioridade com folhas (peso = frequência)',
+      'enquanto >1 nó:',
+      '  combina os DOIS menores em um novo nó',
+      'a raiz final dá os códigos (0 à esquerda, 1 à direita)',
+    ],
+    pitfalls: [
+      'Sempre combine os DOIS de menor frequência.',
+      'É um código de prefixo: nenhum código é prefixo de outro.',
+      'Símbolos mais frequentes ficam mais perto da raiz (códigos curtos).',
+    ],
+  },
+  {
+    key: 'activity',
+    algoKey: 'activity',
+    title: 'Seleção de Atividades',
+    tags: ['guloso'],
+    complexity: 'O(n log n) (ordenar) · O(n) se já ordenado',
+    when: 'Maximizar nº de atividades compatíveis (não sobrepostas).',
+    pseudo: [
+      'ordena por horário de TÉRMINO crescente',
+      'seleciona a 1ª; depois cada atividade cujo início ≥ término da última escolhida',
+    ],
+    pitfalls: [
+      'A escolha gulosa é por menor TÉRMINO (não menor duração nem início).',
+      'Atividade compatível: início ≥ término da anterior selecionada.',
+      'Escolher a que começa mais tarde também é ótimo (prova simétrica).',
+    ],
+  },
+  {
+    key: 'knapsack',
+    algoKey: 'knapsack',
+    title: 'Mochila Fracionária',
+    tags: ['guloso'],
+    complexity: 'O(n log n)',
+    when: 'Maximizar valor podendo levar frações dos itens.',
+    pseudo: [
+      'ordena por razão valor/peso decrescente',
+      'enche a mochila com os de maior razão; o último entra fracionado',
+    ],
+    pitfalls: [
+      'A versão FRACIONÁRIA é gulosa; a 0/1 NÃO é (precisa de prog. dinâmica).',
+      'Ordene por valor/peso, não por valor nem por peso isolado.',
+    ],
+  },
+]
+
+export function conceptsForAlgo(algoKey) {
+  return CONCEPTS.filter((c) => c.algoKey === algoKey)
+}
