@@ -78,38 +78,6 @@ Scripts disponíveis:
 
 ---
 
-## 🐧 Windows + WSL2 (Ubuntu) — *configuração usada no desenvolvimento*
-
-1. **Abra o terminal do Ubuntu (WSL)** e instale o Node (via nvm, recomendado):
-   ```bash
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-   source ~/.bashrc
-   nvm install --lts        # instala o Node LTS
-   ```
-   Ou via apt (versão pode ser mais antiga):
-   ```bash
-   sudo apt update && sudo apt install -y nodejs npm
-   ```
-
-2. **Entre na pasta do projeto e rode:**
-   ```bash
-   cd ~/prog/paa/grafo-game
-   npm install
-   npm run dev
-   ```
-
-3. Acesse **http://localhost:5173** no navegador do **Windows**.
-
-> 💡 **Se `localhost:5173` não abrir no Windows** (acontece em algumas configurações de WSL2):
-> use o **IP do WSL** que o Vite mostra na linha `Network:` ao iniciar, por exemplo
-> `http://172.20.158.38:5173`. Para descobrir o IP manualmente:
-> ```bash
-> hostname -I
-> ```
-> O `vite.config.js` já está com `host: true`, então o servidor escuta em todas as interfaces.
-
----
-
 ## 🍎 macOS
 
 1. **Instale o Node.js**
