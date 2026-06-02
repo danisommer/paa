@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft,
@@ -73,11 +73,12 @@ export default function MissionsMode() {
 function MissionRunner({ mission, onBack, onNext }) {
   const completeMission = useGameStore((s) => s.completeMission)
   const openConcepts = useGameStore((s) => s.openConcepts)
-  const [state, setState] = useState({})
+  // initialise synchronously so widgets never see an empty state on first render
+  const [state, setState] = useState(() => initialState(mission))
   const [attempts, setAttempts] = useState(0)
   const [result, setResult] = useState(null)
   const [showHint, setShowHint] = useState(false)
-  const [startTime] = useState(() => Date.now())
+  const startTimeRef = useRef(Date.now())
 
   // reset interaction state on mission change
   useEffect(() => {
@@ -85,13 +86,14 @@ function MissionRunner({ mission, onBack, onNext }) {
     setAttempts(0)
     setResult(null)
     setShowHint(false)
+    startTimeRef.current = Date.now()
   }, [mission])
 
   function check() {
     const payload = toPayload(mission, state)
     const res = mission.validate(payload)
     if (res.ok) {
-      const timeMs = Date.now() - startTime
+      const timeMs = Date.now() - startTimeRef.current
       completeMission(mission.id, { score: res.score, timeMs, errors: attempts })
       setResult({ ...res, timeMs })
     } else {
@@ -451,20 +453,22 @@ function GraphWidget({ mission, state, setState, result }) {
 
 function FlowWidget({ mission, state, setState }) {
   const g = mission.graph
+  const flows = state.flows || {}
   function setFlow(key, delta, cap) {
     setState((s) => {
-      const v = Math.max(0, Math.min(cap, (s.flows[key] || 0) + delta))
-      return { ...s, flows: { ...s.flows, [key]: v } }
+      const f = s.flows || {}
+      const v = Math.max(0, Math.min(cap, (f[key] || 0) + delta))
+      return { ...s, flows: { ...f, [key]: v } }
     })
   }
   const value = g.edges
     .filter((e) => e.source === 'S')
-    .reduce((acc, e) => acc + (state.flows[`${e.source}->${e.target}`] || 0), 0)
+    .reduce((acc, e) => acc + (flows[`${e.source}->${e.target}`] || 0), 0)
 
   return (
     <div className="flex h-full">
       <div className="min-h-0 flex-1">
-        <GraphCanvas graph={g} flows={state.flows} />
+        <GraphCanvas graph={g} flows={flows} />
       </div>
       <div className="w-72 shrink-0 space-y-2 overflow-y-auto border-l border-line p-3">
         <div className="rounded-lg bg-sky-500/10 px-3 py-2 text-center">
@@ -483,7 +487,7 @@ function FlowWidget({ mission, state, setState }) {
                   <Minus size={14} />
                 </button>
                 <span className="w-12 text-center font-mono text-sm">
-                  <b className="text-sky-300">{state.flows[key] || 0}</b>
+                  <b className="text-sky-300">{flows[key] || 0}</b>
                   <span className="text-muted">/{e.weight}</span>
                 </span>
                 <button onClick={() => setFlow(key, 1, e.weight)} className="rounded bg-panel p-1 text-ink hover:bg-black/30">
